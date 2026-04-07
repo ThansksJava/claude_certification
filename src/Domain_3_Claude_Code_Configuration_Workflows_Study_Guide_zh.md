@@ -466,13 +466,13 @@ project-root/
 ```yaml
 ---
 name: security-audit
-description: Performs deep security analysis of the codebase
+description: 对代码库进行深度安全分析
 context: fork
 allowed-tools: [Read, Grep, Glob]
-argument-hint: "Enter the directory or file path to audit"
+argument-hint: "输入要审计的目录或文件路径"
 ---
 
-Perform a comprehensive security audit of $ARGUMENTS...
+对 $ARGUMENTS 执行全面安全审计...
 ```
 
 **测试规则示例（`.claude/rules/test-conventions.md`）：**
@@ -481,10 +481,10 @@ Perform a comprehensive security audit of $ARGUMENTS...
 paths: ["**/*.test.ts", "**/*.spec.ts", "**/tests/**/*"]
 ---
 
-All test files must follow these conventions:
-- Use describe/it blocks
-- Mock all external dependencies
-- Each test must have an assertion
+所有测试文件必须遵循以下约定：
+- 使用 describe/it 块
+- Mock 所有外部依赖
+- 每个测试必须有断言
 ```
 
 ---

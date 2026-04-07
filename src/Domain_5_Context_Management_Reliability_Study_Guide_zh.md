@@ -67,7 +67,7 @@ CASE FACTS (do not summarise — include verbatim in every prompt):
 
 **问题：**工具常返回超量字段，持续累积会快速耗尽 token。
 
-```python
+`````python
 order = lookup_order("8891")
 
 relevant = {
@@ -86,7 +86,7 @@ relevant = {
 
 每次 API 调用都必须带上从第一轮开始的完整会话历史。模型调用是无状态的。
 
-```python
+`````python
 # WRONG
 messages = [{"role": "user", "content": current_message}]
 
@@ -198,7 +198,7 @@ messages = conversation_history + [{"role": "user", "content": current_message}]
 ### 两个反模式
 
 **反模式 1：静默吞错**
-```python
+`````python
 try:
     result = fetch_journal_data(query)
 except Exception:
@@ -208,7 +208,7 @@ except Exception:
 看起来“成功但空结果”，协调器不知道数据源不可用，导致不可恢复的静默缺口。
 
 **反模式 2：一错全停**
-```python
+`````python
 try:
     result = fetch_journal_data(query)
 except Exception:
@@ -218,7 +218,7 @@ except Exception:
 单点失败毁掉所有已成功子任务结果。
 
 **正确模式：结构化传播 + 保留部分结果**
-```python
+`````python
 try:
     result = fetch_journal_data(query)
 except TransientError as e:
@@ -288,6 +288,10 @@ Coverage based on 2 web sources only.
 - JWT RS256 in AuthService.java:847
 - Token expiry: 24h (config/auth.yml:12)
 - Refresh logic: RefreshTokenService.java:203
+
+## Database Layer
+- ORM: Hibernate 6.2
+- Connection pool: HikariCP, max 20 connections (db.properties:34)
 ```
 
 依赖文件持久化，不依赖会话内短期记忆。
@@ -302,6 +306,11 @@ Main: 调查支付链路
 ```
 
 **3) 阶段摘要注入**：每阶段结束先结构化总结，再进入下一阶段。
+
+```
+Phase 1 complete. Summary: [结构化发现摘要]
+Phase 2 以此摘要为上下文开始，而非 Phase 1 的原始输出。
+```
 
 **4) `/compact`**：当会话“抓不住早期结论”时，用于压缩上下文占用。
 
@@ -325,7 +334,14 @@ Manifest 示例：
 }
 ```
 
-恢复时由协调器加载已有 manifest，只重跑未完成工作。
+崩溃/恢复时，协调器加载所有已有 manifest 并重建状态：
+```python
+manifests = load_all_manifests("./state/")
+coordinator_context = build_context_from_manifests(manifests)
+# 只为尚未完成的工作启动子代理
+```
+
+这样可以避免在长运行中某个 agent 后期失败时完全重启整个流水线。
 
 ### 检查题
 
@@ -597,7 +613,7 @@ Coordinator
 
 ### 1）Case Facts 块
 
-```python
+`````python
 CASE_FACTS = """
 CASE FACTS [DO NOT SUMMARISE — INCLUDE VERBATIM]:
 - Customer: James Okafor, account #44821
@@ -611,7 +627,7 @@ CASE FACTS [DO NOT SUMMARISE — INCLUDE VERBATIM]:
 
 ### 2）模拟超时 + 结构化错误传播
 
-```python
+`````python
 def web_search_agent(query):
     try:
         result = search(query, timeout=10)
@@ -629,7 +645,7 @@ def web_search_agent(query):
 
 ### 3）冲突来源保留
 
-```python
+`````python
 def synthesise(findings):
     conflicts = detect_conflicts(findings)
     for conflict in conflicts:
